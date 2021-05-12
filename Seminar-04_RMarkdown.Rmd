@@ -1,0 +1,332 @@
+---
+title: "Seminar 04: RMarkdown"
+author: "Jasper Hackling"
+date: "06.05.2021"
+output: html_document
+---
+
+\ 
+
+## Seminar 04: Learning RMarkdown 
+
+\ 
+
+Hello everybody,  
+
+I am sure many of you already took the course "Data Analysis and Visualization" headed by Prof. Schoof. In that module, we were introduced to using the R programming language to analyse and visualise data for our research projects. Back then, my study group and I decided to hand in our assignments as PDF files created using RMarkdown, so we already came into contact with what Cory is teaching us right now.  
+
+For this week's assignment in the decision analysis module, I thought "*Why not benefit from something I already did in the past?*". Thus, I extracted some parts of our assignments from the last semester which I think looked especially nice in RMarkdown (Data Analysis and Visualization, Winter term 2020/21, Assignment 5). Please find them below and - if you like - tell me what you think. Hopefully some of you who are new to RMarkdown can find inspiration in these examples. 
+
+Additionally, here are some sources I found very helpful to get started with the RMarkdown basics, as well as some general tricks that I like personally: 
+
+* [RMarkdown Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
+* [Official introductory lesson for using RMarkdown](https://rmarkdown.rstudio.com/lesson-1.html)
+* To create a blank line in the output document (e.g. to separate paragraphs), just insert a backslash ("\") followed by a blank space. The symbol shoud then change its colour to indicate that it's read as a blank line. 
+* When creating PDFs, you might want to start a new paragraph on the top of a new page instead of on the bottom of the prior page. To do so, insert "\newpage" before the respective paragraph. 
+* Handy keyboard shortcuts:
+  + Insert assignment arrow (<-): Alt + - 
+  + Insert pipe (%>%): Ctrl + Shift + M 
+  + Run current line: Shift + Enter 
+  + Insert code chunk in RMarkdown: Ctrl + Alt + I
+  + [List of more keyboard shortcuts](https://www.rstudio.com/wp-content/uploads/2016/01/rstudio-IDE-cheatsheet.pdf)
+  
+Kind regards,  
+Jasper 
+
+\ 
+
+
+**Load necessary packages**
+```{r}
+library(ggplot2)
+library(car)
+```
+
+\ 
+
+### Exercise 1a 
+
+**Importing the data**
+```{r, results = "hide"}
+tree_rings <- read.csv("tree_rings.csv")
+tree_rings
+```
+\ 
+
+**Describing the variables **
+```{r}
+str(tree_rings)
+class(tree_rings$ring)
+class(tree_rings$rain)
+```
+
+The data frame contains 2 variables:
+
+* *ring*:
+  + Numerical vector
+  + Scale: quantitative, continuous 
+  + Effect type: random 
+  + Dependent variable 
+
+* *rain*: 
+  + Numerical vector (integer)
+  + Scale: quantitative, categorical 
+  + Effect type: random 
+  + Independent variable  
+
+\ 
+
+#### Describing the values  
+
+**summary() function:**
+```{r}
+summary(tree_rings)
+```
+\ 
+
+**Scatterplots:**
+```{r, fig.height = 4, fig.width = 6}
+ggplot(tree_rings, mapping = aes(x = rain, y = ring)) + 
+  geom_point() +
+  labs(x = "Precipitation [mm]", 
+       y = "Tree ring perimeter [mm]", 
+       title = "Relationship between precipitation and tree rings") + 
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +   # Center title 
+  theme(plot.title = element_text(face = "bold"))   # Make title more visible 
+```
+\newpage
+
+**Boxplot**
+```{r}
+attach(tree_rings)
+boxplot(ring~rain, 
+        col = "white",  # Change box fill colour to white
+        main = "Tree rings dependent on rain")  # Specify title 
+```
+
+
+**Histograms:**
+
+```{r, fig.height = 4, fig.width = 8}
+par(mfrow = c(1,2))
+
+hist(x = tree_rings$ring,
+     xlab = "Tree ring perimeter [mm]",
+     ylab = "Count",
+     main = "Histogram: Tree ring perimeter",
+     col = "white")
+
+hist(x = tree_rings$rain,
+     xlab = "Precipitation [mm]",
+     ylab = "Count", 
+     main = "Histogram: Precipitation",
+     col = "white")
+```
+
+\ 
+
+**QQ-Plots:**
+```{r, fig.height = 4, fig.width = 8}
+par(mfrow = c(1,2))
+
+# Variable "ring"
+qqnorm(tree_rings$ring,
+       xlab = "Norm quantiles",
+       ylab = "Tree ring perimeter [mm]",
+       main = "Tree rings")
+qqline(tree_rings$ring)
+
+# Variable "rain" 
+qqnorm(tree_rings$rain,
+       xlab = "Norm quantiles",
+       ylab = "Amount of precipitation [mm]",
+       main = "Precipitation")
+qqline(tree_rings$rain)
+```
+
+**Interpretation**  
+
+Deleting or keeping the outliers depends on what causes the outliers.They are most easy to identify when the dataset is portrayed as a boxplot or QQ-Plot. If the outliers are e.g. measuring mistakes, one should look at the QQ-Plot to identify the outliers and delete them from the dataset. If they are rare but part of the process one should keep them in the dataset. So with outliers one has to look at the individual case and decide what makes sense to do. They are most easy to identify when the dataset is portrayed as a boxplot or QQ-Plot.
+In this case, one outlier (on the 204 mm rain) can be identified based on the boxplot. The QQ-Plots underpin the results of the boxplot, revealing the same amount of outliers for the same amount of precipitation.
+
+\ 
+
+### Exercise 1b 
+
+First, we note that:
+
+* Variable x (rain) = random effect 
+* Variable y (ring) = random effect 
+
+Accordingly, we deduce the following: 
+
+* Suitable correlation parameter: **Correlation coeffcient R** (Pearson)
+* Appropriate regression model: **Model II** regression 
+
+\ 
+
+### Exercise 1c 
+
+**Determining coefficient of correlation (R)**
+```{r}
+cor.test(tree_rings$rain, tree_rings$ring)
+```
+\ 
+
+**Interpretation:** 
+
+The coeffcient of correlation between the "rain" and "ring" variable is **R = 0.39**. The closer R is to +1 or -1, the greater is the strength of the association. Therefore, the value at hand represents a positive yet rather weak correlation as it is smaller than 0.5. 
+
+\ 
+
+### Exercise 1d
+
+**Hypotheses:**
+
+* $H_{0}$: p = 0 
+* $H_{A}$: p $\neq$ 0 (Population correlation unequal to zero $\Rightarrow$ linear correlation between both parameters on significance level $\alpha$ = 0.01)
+
+```{r}
+cor.test(x = tree_rings$rain, 
+         y = tree_rings$ring,
+         conf.level = 0.99)
+```
+\ 
+
+**Interpretation**  
+
+$\varphi$ = 0.026 $>\alpha\Rightarrow$ keep $H_{0}$ 
+
+As we cannot reject the $H_{0}$ hypothesis, we assume that there is **no significant linear correlation** between the two parameters on significance level $\alpha$ = 0.01.
+
+\ 
+
+### Exercise 2a
+
+**Importing the data** 
+```{r}
+Nplant <- read.delim("Nplant.txt", header = TRUE)
+head(Nplant)
+```
+
+\ 
+
+**Establishing factor levels for categorical-scale fertiliser variable**
+
+```{r}
+# How many different fertiliser levels are there?
+unique(Nplant$Nfertil)
+```
+
+```{r}
+# Create vector containing precipitation levels
+fertil_levels <- unique(Nplant$Nfertil) 
+
+# Create new data frame with "Nfertil" variable as factor vector
+Nplant_fac <- Nplant
+
+# Introduce factor levels to "Nfertil" variable 
+Nplant_fac$Nfertil <- factor(Nplant_fac$Nfertil, levels = fertil_levels)
+
+# Check for success
+class(Nplant_fac$Nfertil)
+```
+
+\ 
+
+**Histogram**
+```{r, fig.height = 4, fig.width = 6}
+hist(x = Nplant_fac$pheight,
+     xlab = "Plant height [cm]",
+     ylab = "Count",
+     main = "Histogram: Plant height",
+     col = "white")
+```
+
+
+**Scatterplot**
+```{r, fig.height = 4, fig.width = 6}
+ggplot(Nplant_fac, mapping = aes(x = Nfertil, y = pheight)) + 
+  geom_point() +
+  labs(x = "Amount of N-fertiliser [ml]", 
+       y = "Plant height [cm]", 
+       title = "Association between N-fertiliser and plant height") + 
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +   # Center title 
+  theme(plot.title = element_text(face = "bold"))   # Make title more visible 
+  
+```
+
+\ 
+
+**Boxplot**
+```{r, fig.height = 4, fig.width = 6}
+ggplot(Nplant_fac)+ 
+  geom_boxplot(mapping = aes(x = Nfertil, y = pheight),
+               width = 0.5) +    # Change box width 
+  labs(x = "Amount of N-fertiliser [ml]", 
+       y = "Plant height [cm]", 
+       title = "Association between N-fertiliser and plant height") + 
+  theme_bw() + 
+  theme(plot.title = element_text(hjust = 0.5)) +   
+  theme(plot.title = element_text(face = "bold")) 
+```
+
+Outliers can be identified on the 5, 8, and 11 ml factor levels.
+
+\ 
+
+**QQ-plots**
+```{r, results = "hide", fig.height = 10.8, fig.width = 8}
+par(mfrow = c(3,2))
+
+qqPlot(subset(Nplant_fac, Nfertil == 5)$pheight,
+       xlab = "Norm quantiles",
+       ylab = "Plant height [cm]",
+       main = "Plant height with 5 ml of N-fertiliser \n qqPlot with 95% CI",
+       col.lines = "brown2")
+
+qqPlot(subset(Nplant_fac, Nfertil == 8)$pheight,
+       xlab = "Norm quantiles",
+       ylab = "Plant height [cm]",
+       main = "Plant height with 8 ml of N-fertiliser \n qqPlot with 95% CI",
+       col.lines = "cyan2")
+
+qqPlot(subset(Nplant_fac, Nfertil == 11)$pheight,
+       xlab = "Norm quantiles",
+       ylab = "Plant height [cm]",
+       main = "Plant height with 11 ml of N-fertiliser \n qqPlot with 95% CI",
+       col.lines = "forestgreen")
+
+qqPlot(subset(Nplant_fac, Nfertil == 14)$pheight,
+       xlab = "Norm quantiles",
+       ylab = "Plant height [cm]",
+       main = "Plant height with 14 ml of N-fertiliser \n qqPlot with 95% CI",
+       col.lines = "gold2")
+
+qqPlot(subset(Nplant_fac, Nfertil == 17)$pheight,
+       xlab = "Norm quantiles",
+       ylab = "Plant height [cm]",
+       main = "Plant height with 17 ml of N-fertiliser \n qqPlot with 95% CI",
+       col.lines = "purple3")
+```
+
+\ 
+
+Just as with in boxplot depicted before, outliers can be identified on the 5, 8, and 11 ml factor levels. 
+
+\ 
+
+**Interpretation**  
+
+Deleting or keeping the outliers depends on what causes the outliers.They are most
+easy to identify when the dataset is portrayed as a boxplot or QQ-Plot. If 
+the outliers are e.g. measuring mistakes, one should look at the QQ-Plot to identify the
+outliers and delete them from the dataset. If they are rare but part of the 
+process one should keep them in the dataset. So with outliers one has to 
+look at the individual case and decide what makes sense to do. They are most
+easy to identify when the dataset is portrayed as a boxplot or QQ-Plot.  
+
+In this case, four outliers (one on the 5 ml, two on the 8 ml and one on the 11 ml factor level) can be identified based on the boxplot. 
+The QQ-Plots underpin the results of the boxplot, revealing the same amount of outliers for the same levels of fertiliser.  
