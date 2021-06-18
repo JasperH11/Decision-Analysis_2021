@@ -218,3 +218,4 @@ compound_figure(mcSimulation_object = mcSimulation_results,
                 EVPIresults = evpi, decision_var_name = "NPV_decision_do", 
                 cashflow_var_name = "Cashflow_decision_do", 
                 base_size = 7)
+
