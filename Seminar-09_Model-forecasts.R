@@ -115,3 +115,4 @@ evpi_hail <- multi_EVPI(mc = mcSimulation_table_hail,
 
 # Plot result
 plot_evpi(evpi_hail, decision_vars = "NPV_decision")
+
