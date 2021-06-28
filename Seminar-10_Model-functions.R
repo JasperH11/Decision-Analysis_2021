@@ -16,7 +16,8 @@ plot(valvar)
 valvar <- vv(var_mean = 50, 
              var_CV = 10, 
              n = 30, 
-             absolute_trend = 10) # Absolute increment in 'var_mean' in each time step
+             absolute_trend = 10) # Absolute increment in 'var_mean' in each 
+                                  # time step
 plot(valvar)
 
 
@@ -24,7 +25,8 @@ plot(valvar)
 valvar <- vv(var_mean = 100, 
              var_CV = 5, 
              n = 40, 
-             relative_trend = 5) # Relative trend (in %) in 'var_mean' in each time step 
+             relative_trend = 5) # Relative trend (in %) in 'var_mean' in each 
+                                 # time step 
 plot(valvar)
 
 
@@ -37,15 +39,18 @@ plot(chancevar)
 # Additional arguments 
 chancevar <- chance_event(chance = 0.1,
                           value_if = 5,
-                          value_if_not = 20,  # Output value in case of event not happening 
+                          value_if_not = 20,  # Output value in case of event 
+                                              # not happening 
                           n = 100,
-                          CV_if = 10)  # Coefficient of variation for introducing randomness into 'value_if' data set 
+                          CV_if = 10)  # Coefficient of variation for introducing 
+                                       # randomness into 'value_if' data set 
 plot(chancevar)
 
 
 # Gompertz function: Yield prediction for perennials ----
 
-# Create vector: Maximum harvest = 500, which is achieved in 10 years (i.e. 100% by the second yield estimate)
+# Create vector: Maximum harvest = 500, which is achieved in 10 years 
+# (i.e. 100% by the second yield estimate)
 gomp_yield <- gompertz_yield(max_harvest = 500,
                              time_to_first_yield_estimate = 5,
                              first_yield_estimate_percent = 10,
